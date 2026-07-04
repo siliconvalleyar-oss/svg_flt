@@ -18,10 +18,30 @@ class RivePlayerWidget extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: RiveAnimation.asset(
-        assetPath,
-        fit: BoxFit.contain,
-        animations: const [],
+      child: RiveWidgetBuilder(
+        fileLoader: FileLoader.fromAsset(
+          assetPath,
+          riveFactory: Factory.flutter,
+        ),
+        builder: (context, state) {
+          if (state is RiveLoaded) {
+            return RiveWidget(
+              controller: state.controller,
+              fit: Fit.contain,
+            );
+          } else if (state is RiveFailed) {
+            return const Center(
+              child: Icon(Icons.error_outline, color: Colors.red),
+            );
+          }
+          return const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
       ),
     );
   }
