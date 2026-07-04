@@ -46,6 +46,7 @@ git push origin main --tags
 | R4 | No sobrescribir tags existentes |
 | R5 | `flutter analyze` debe pasar antes de commitear |
 | R6 | `flutter test` debe pasar antes de pushear |
+| R7 | Al subir al móvil: si `flutter run` falla, reintentar hasta 5 veces con 1 minuto de espera entre cada intento. No desinstalar la app del móvil, sino reemplazarla (flutter run ya hace replace por defecto) |
 
 ## Convención de commits
 
