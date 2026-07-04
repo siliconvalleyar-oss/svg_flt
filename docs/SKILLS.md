@@ -11,7 +11,7 @@
 
 ## Versionado
 
-- Seguir estrictamente `docs/RULE.md`
+- Seguir estrictamente `docs/RULES.md`
 - `VERSION` es la fuente de verdad para tags
 - Incrementar `VERSION` antes de cada commit
 

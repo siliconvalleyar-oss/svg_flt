@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'widgets/svg_viewer.dart';
+import 'package:share_plus/share_plus.dart';
+import 'widgets/svg_webview.dart';
 import 'widgets/rive_player.dart';
 import 'widgets/animated_icon.dart';
 import 'widgets/minimal_button.dart';
@@ -17,19 +18,45 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _svgPath = 'Pictures/svg';
-  String _rivPath = 'Pictures/riv';
+  String _svgPath = '/sdcard/Pictures/svg';
+  String _rivPath = '/sdcard/Pictures/riv';
   bool _darkBackground = false;
 
   List<File> _phoneSvgs = [];
   List<File> _phoneRivs = [];
+  List<String> _assetSvgs = [];
   List<String> _assetRives = [];
   bool _loadingPhone = false;
+
+  final Set<String> _selected = {};
 
   @override
   void initState() {
     super.initState();
+    _loadAssetSvgs();
     _loadAssetRives();
+  }
+
+  Future<void> _loadAssetSvgs() async {
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      _assetSvgs = manifest.listAssets()
+          .where((key) => key.startsWith('assets/svg/') && key.endsWith('.svg'))
+          .toList()
+        ..sort();
+    } catch (_) {
+      _assetSvgs = [
+        'assets/svg/animated_00.svg',
+        'assets/svg/animated_01.svg',
+        'assets/svg/atardecer_00.svg',
+        'assets/svg/car_animated_04.svg',
+        'assets/svg/car-lite.svg',
+        'assets/svg/index-octonaut.svg',
+        'assets/svg/jellyfish.svg',
+        'assets/svg/simbol_git.svg',
+      ];
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadAssetRives() async {
@@ -53,8 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _loadingPhone = true);
     try {
       final dir = type == 'svg'
-          ? Directory('/storage/emulated/0/$_svgPath')
-          : Directory('/storage/emulated/0/$_rivPath');
+          ? Directory(_svgPath)
+          : Directory(_rivPath);
 
       if (await dir.exists()) {
         final files = dir.listSync().whereType<File>().toList();
@@ -179,35 +206,37 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionTitle('SVG Animations'),
-            const SizedBox(height: 12),
-            _svgGrid(),
-            const SizedBox(height: 32),
-            _sectionTitle('Rive Animations'),
-            const SizedBox(height: 12),
-            _riveGrid(),
-            const SizedBox(height: 32),
-            _sectionTitle('Animated Icons'),
-            const SizedBox(height: 12),
-            _iconRow(),
-            const SizedBox(height: 32),
-            _sectionTitle('Minimal Buttons'),
-            const SizedBox(height: 12),
-            _buttonRow(),
-            const SizedBox(height: 32),
-            _sectionTitle('SVGs del teléfono'),
-            const SizedBox(height: 12),
-            _phoneSvgSection(),
-            const SizedBox(height: 32),
-            _sectionTitle('RIVs del teléfono'),
-            const SizedBox(height: 12),
-            _phoneRivSection(),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionTitle('SVG Animations'),
+              const SizedBox(height: 12),
+              _svgGrid(),
+              const SizedBox(height: 32),
+              _sectionTitle('Rive Animations'),
+              const SizedBox(height: 12),
+              _riveGrid(),
+              const SizedBox(height: 32),
+              _sectionTitle('Animated Icons'),
+              const SizedBox(height: 12),
+              _iconRow(),
+              const SizedBox(height: 32),
+              _sectionTitle('Minimal Buttons'),
+              const SizedBox(height: 12),
+              _buttonRow(),
+              const SizedBox(height: 32),
+              _sectionTitle('SVGs del teléfono'),
+              const SizedBox(height: 12),
+              _phoneSvgSection(),
+              const SizedBox(height: 32),
+              _sectionTitle('RIVs del teléfono'),
+              const SizedBox(height: 12),
+              _phoneRivSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -228,81 +257,78 @@ class _HomeScreenState extends State<HomeScreen> {
     ).animate().fadeIn().slideX(begin: -20, end: 0);
   }
 
-  Widget _svgGrid() {
-    final svgs = <_SvgItem>[
-      _SvgItem('assets/svg/animated_00.svg', 'Animated 00', true),
-      _SvgItem('assets/svg/atom-portal.svg', 'Atom Portal', false),
-      _SvgItem('assets/svg/sample.svg', 'Sample', false),
-    ];
+  Set<String> _sectionSelected(Iterable<String> items) =>
+      _selected.where((p) => items.any((i) => i == p)).toSet();
 
+  Widget _buildGridItem({
+    required String id,
+    required Set<String> sectionSelected,
+    required int index,
+    required Widget child,
+    double width = 140,
+    EdgeInsets padding = const EdgeInsets.all(16),
+  }) {
+    final isSelected = sectionSelected.contains(id);
+    final opacity = sectionSelected.isNotEmpty ? (isSelected ? 1.0 : 0.35) : 1.0;
+
+    return GestureDetector(
+      onTap: () => setState(() {
+        if (isSelected) { _selected.remove(id); }
+        else { _selected.add(id); }
+      }),
+      child: AnimatedOpacity(
+        opacity: opacity,
+        duration: const Duration(milliseconds: 200),
+        child: Container(
+          width: width,
+          decoration: BoxDecoration(
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: padding,
+          child: child,
+        ),
+      ),
+    ).animate().fadeIn(duration: 500.ms, delay: (index * 150).ms).slideX(
+          begin: 30,
+          end: 0,
+          duration: 500.ms,
+        );
+  }
+
+  Widget _svgGrid() {
+    final sectionSelected = _sectionSelected(_assetSvgs);
     return SizedBox(
       height: 140,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: svgs.length,
+        itemCount: _assetSvgs.length,
         separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
-          final item = svgs[index];
-          return GestureDetector(
-            onTap: () => _showSvgFullscreen(item),
-            child: Container(
-              width: 140,
-              decoration: BoxDecoration(
-                color: _cardColor,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(16),
-              child: item.animated
-                  ? const AnimatedSplashSvg(width: 100, height: 100)
-                  : SvgViewer(
-                      assetPath: item.path,
-                      width: 100,
-                      height: 100,
-                    ),
-            ),
-          ).animate().fadeIn(duration: 500.ms, delay: (index * 150).ms).slideX(
-                begin: 30,
-                end: 0,
-                duration: 500.ms,
-              );
+          final path = _assetSvgs[index];
+          final isAnimated = path == 'assets/svg/animated_00.svg';
+          return _buildGridItem(
+            id: path,
+            sectionSelected: sectionSelected,
+            index: index,
+            child: isAnimated
+                ? const AnimatedSplashSvg(width: 100, height: 100)
+                : _AnimatedSvgViewer(assetPath: path, width: 100, height: 100),
+          );
         },
       ),
     );
   }
 
-  void _showSvgFullscreen(_SvgItem item) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: _bgColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            foregroundColor: _fgColor,
-            elevation: 0,
-            title: Text(item.label),
-          ),
-          body: Center(
-            child: item.animated
-                ? const AnimatedSplashSvg(width: 300, height: 300)
-                : SvgViewer(
-                    assetPath: item.path,
-                    width: 300,
-                    height: 300,
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _riveGrid() {
+    final sectionSelected = _sectionSelected(_assetRives);
     return SizedBox(
       height: 140,
       child: ListView.separated(
@@ -311,58 +337,18 @@ class _HomeScreenState extends State<HomeScreen> {
         separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final path = _assetRives[index];
-          final label = path.split('/').last.replaceAll('.riv', '');
-          return GestureDetector(
-            onTap: () => _showRiveFullscreen(path, label),
-            child: Container(
-              width: 140,
-              decoration: BoxDecoration(
-                color: _cardColor,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(8),
-              child: RivePlayerWidget(
-                assetPath: path,
-                width: 120,
-                height: 120,
-              ),
-            ),
-          ).animate().fadeIn(duration: 500.ms, delay: (index * 150).ms).slideX(
-                begin: 30,
-                end: 0,
-                duration: 500.ms,
-              );
-        },
-      ),
-    );
-  }
-
-  void _showRiveFullscreen(String path, String label) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: _bgColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            foregroundColor: _fgColor,
-            elevation: 0,
-            title: Text(label),
-          ),
-          body: Center(
+          return _buildGridItem(
+            id: path,
+            sectionSelected: sectionSelected,
+            index: index,
+            padding: const EdgeInsets.all(8),
             child: RivePlayerWidget(
               assetPath: path,
-              width: 300,
-              height: 300,
+              width: 120,
+              height: 120,
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -387,7 +373,12 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Cambiar carpeta SVGs',
             onTap: () => _loadPhoneFiles('svg'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          _buildSelectionToolbar(
+            sectionSelected: _sectionSelected(_phoneSvgs.map((f) => f.path)),
+            allFiles: _phoneSvgs,
+            sectionLabel: 'SVG',
+          ),
           SizedBox(
             height: 140,
             child: ListView.separated(
@@ -396,45 +387,32 @@ class _HomeScreenState extends State<HomeScreen> {
               separatorBuilder: (_, _) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
                 final file = _phoneSvgs[index];
-                final name = file.path.split('/').last;
-                return GestureDetector(
-                  onTap: () => _showPhoneSvgFullscreen(file, name),
-                  child: Container(
-                    width: 140,
-                    decoration: BoxDecoration(
-                      color: _cardColor,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                return _buildGridItem(
+                  id: file.path,
+                  sectionSelected: _sectionSelected(_phoneSvgs.map((f) => f.path)),
+                  index: index,
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: SvgPicture.file(
+                          file,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.contain,
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: SvgPicture.file(
-                            file,
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.contain,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        file.path.split('/').last,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: _fgColor.withValues(alpha: 0.5),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: _fgColor.withValues(alpha: 0.5),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 );
               },
@@ -442,30 +420,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ],
-    );
-  }
-
-  void _showPhoneSvgFullscreen(File file, String label) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: _bgColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            foregroundColor: _fgColor,
-            elevation: 0,
-            title: Text(label),
-          ),
-          body: Center(
-            child: SvgPicture.file(
-              file,
-              width: 300,
-              height: 300,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -489,7 +443,12 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Cambiar carpeta RIVs',
             onTap: () => _loadPhoneFiles('riv'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          _buildSelectionToolbar(
+            sectionSelected: _sectionSelected(_phoneRivs.map((f) => f.path)),
+            allFiles: _phoneRivs,
+            sectionLabel: 'RIV',
+          ),
           SizedBox(
             height: 140,
             child: ListView.separated(
@@ -498,44 +457,31 @@ class _HomeScreenState extends State<HomeScreen> {
               separatorBuilder: (_, _) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
                 final file = _phoneRivs[index];
-                final name = file.path.split('/').last;
-                return GestureDetector(
-                  onTap: () => _showPhoneRivFullscreen(file, name),
-                  child: Container(
-                    width: 140,
-                    decoration: BoxDecoration(
-                      color: _cardColor,
-                      borderRadius: BorderRadius.circular(18),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                return _buildGridItem(
+                  id: file.path,
+                  sectionSelected: _sectionSelected(_phoneRivs.map((f) => f.path)),
+                  index: index,
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: RivePlayerWidget(
+                          filePath: file.path,
+                          width: 100,
+                          height: 100,
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: RivePlayerWidget(
-                            filePath: file.path,
-                            width: 100,
-                            height: 100,
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        file.path.split('/').last,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: _fgColor.withValues(alpha: 0.5),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: _fgColor.withValues(alpha: 0.5),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 );
               },
@@ -543,29 +489,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ],
-    );
-  }
-
-  void _showPhoneRivFullscreen(File file, String label) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: _bgColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            foregroundColor: _fgColor,
-            elevation: 0,
-            title: Text(label),
-          ),
-          body: Center(
-            child: RivePlayerWidget(
-              filePath: file.path,
-              width: 300,
-              height: 300,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -590,6 +513,110 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildSelectionToolbar({
+    required Set<String> sectionSelected,
+    required List<File> allFiles,
+    required String sectionLabel,
+  }) {
+    if (allFiles.isEmpty) return const SizedBox.shrink();
+    final allSelected = sectionSelected.length == allFiles.length;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          OutlinedButton(
+            onPressed: () => setState(() {
+              if (allSelected) {
+                _selected.removeWhere((p) => allFiles.any((f) => f.path == p));
+              } else {
+                for (final f in allFiles) {
+                  _selected.add(f.path);
+                }
+              }
+            }),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _fgColor,
+              side: BorderSide(color: _fgColor.withValues(alpha: 0.3)),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              textStyle: const TextStyle(fontSize: 12),
+            ),
+            child: Text(allSelected ? 'Deselect All' : 'Select All'),
+          ),
+          if (sectionSelected.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: () => _deleteSelected(sectionSelected, allFiles, sectionLabel),
+              icon: const Icon(Icons.delete_outline, size: 18),
+              label: const Text('Delete', style: TextStyle(fontSize: 12)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+                side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: () => _shareSelected(sectionSelected),
+              icon: const Icon(Icons.share, size: 18),
+              label: const Text('Share', style: TextStyle(fontSize: 12)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _fgColor,
+                side: BorderSide(color: _fgColor.withValues(alpha: 0.3)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteSelected(
+    Set<String> sectionSelected,
+    List<File> allFiles,
+    String sectionLabel,
+  ) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete files'),
+        content: Text(
+          'Delete $sectionSelected.length $sectionLabel file(s)?\nThis cannot be undone.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    for (final f in allFiles) {
+      if (sectionSelected.contains(f.path)) {
+        try {
+          await f.delete();
+        } catch (_) {}
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _selected.removeAll(sectionSelected);
+        _phoneSvgs.removeWhere((f) => sectionSelected.contains(f.path));
+        _phoneRivs.removeWhere((f) => sectionSelected.contains(f.path));
+      });
+      _showSnackBar('Deleted ${sectionSelected.length} file(s)');
+    }
+  }
+
+  Future<void> _shareSelected(Set<String> paths) async {
+    final files = paths.map((p) => XFile(p)).toList();
+    await Share.shareXFiles(files, text: 'Shared from Animated App');
   }
 
   Widget _iconRow() {
@@ -625,11 +652,9 @@ class _HomeScreenState extends State<HomeScreen> {
             elevation: 0,
             title: Text(label),
           ),
-          body: Center(
-            child: SvgViewer(
-              assetPath: assetPath,
-              width: 200,
-              height: 200,
+          body: SafeArea(
+            child: Center(
+              child: _AnimatedSvgViewer(assetPath: assetPath, width: 200, height: 200),
             ),
           ),
         ),
@@ -672,10 +697,52 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _SvgItem {
-  final String path;
-  final String label;
-  final bool animated;
+class _AnimatedSvgViewer extends StatefulWidget {
+  final String assetPath;
+  final double width;
+  final double height;
 
-  const _SvgItem(this.path, this.label, this.animated);
+  const _AnimatedSvgViewer({
+    required this.assetPath,
+    this.width = 300,
+    this.height = 300,
+  });
+
+  @override
+  State<_AnimatedSvgViewer> createState() => _AnimatedSvgViewerState();
+}
+
+class _AnimatedSvgViewerState extends State<_AnimatedSvgViewer> {
+  String? _svgContent;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedSvgViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) {
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    try {
+      final content = await rootBundle.loadString(widget.assetPath);
+      if (mounted) setState(() => _svgContent = content);
+    } catch (_) {
+      if (mounted) setState(() => _svgContent = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_svgContent == null) {
+      return const SizedBox(width: 300, height: 300, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
+    }
+    return SvgWebView(svgContent: _svgContent!, width: widget.width, height: widget.height);
+  }
 }

@@ -54,16 +54,16 @@ class _SplashPainter extends CustomPainter {
   _SplashPainter({required this.elapsedMs});
 
   static const _rings = <_RingDef>[
-    _RingDef(radius: 173, sw: 2, color: 0xFF659cc8, dash: [76, 4, 70], period: 4100, dir: 1, alpha: 0.191),
-    _RingDef(radius: 181, sw: 2, color: 0xFF659cc8, dash: [2, 45, 161], period: 4500, dir: 1, alpha: 1.0),
-    _RingDef(radius: 159, sw: 4, color: 0xFF78af9f, dash: [76, 4, 70], period: 4500, dir: 1, alpha: 1.0),
-    _RingDef(radius: 159, sw: 4, color: 0xFF78af9f, dash: [46, 2, 12], period: 4500, dir: 1, alpha: 0.278),
-    _RingDef(radius: 150, sw: 8, color: 0xFFdda032, dash: [76, 2, 40, 180], period: 0, dir: 1, alpha: 1.0),
-    _RingDef(radius: 165, sw: 8, color: 0xFFdda032, dash: [56, 2, 4], period: 4700, dir: 1, alpha: 0.688),
-    _RingDef(radius: 141, sw: 4, color: 0xFFd36e2d, dash: [51, 4, 10, 80], period: 0, dir: 1, alpha: 1.0),
-    _RingDef(radius: 150, sw: 4, color: 0xFFd36e2d, dash: [140, 4, 10, 80], period: 2000, dir: 1, alpha: 0.441),
-    _RingDef(radius: 130, sw: 2, color: 0xFFc13f21, dash: [35, 7, 10, 80], period: 4700, dir: -1, alpha: 1.0),
-    _RingDef(radius: 130, sw: 2, color: 0xFFc13f21, dash: [35, 7, 10, 80], period: 0, dir: 1, alpha: 0.278),
+    _RingDef(radius: 173, sw: 2, color: 0xFF659cc8, dash: [76, 4, 70], period: 30000, dir: 1, alpha: 0.191),
+    _RingDef(radius: 181, sw: 2, color: 0xFF659cc8, dash: [2, 45, 161], period: 27500, dir: 1, alpha: 1.0),
+    _RingDef(radius: 159, sw: 4, color: 0xFF78af9f, dash: [76, 4, 70], period: 19800, dir: -1, alpha: 1.0),
+    _RingDef(radius: 159, sw: 4, color: 0xFF78af9f, dash: [46, 2, 12], period: 25400, dir: -1, alpha: 0.278),
+    _RingDef(radius: 150, sw: 8, color: 0xFFdda032, dash: [76, 2, 40, 180], period: 26200, dir: 1, alpha: 1.0),
+    _RingDef(radius: 165, sw: 8, color: 0xFFdda032, dash: [56, 2, 4], period: 27900, dir: 1, alpha: 0.688),
+    _RingDef(radius: 141, sw: 4, color: 0xFFd36e2d, dash: [51, 4, 10, 80], period: 26800, dir: 1, alpha: 1.0),
+    _RingDef(radius: 150, sw: 4, color: 0xFFd36e2d, dash: [140, 4, 10, 80], period: 16000, dir: 1, alpha: 0.441),
+    _RingDef(radius: 130, sw: 2, color: 0xFFc13f21, dash: [35, 7, 10, 80], period: 16000, dir: 1, alpha: 1.0),
+    _RingDef(radius: 130, sw: 2, color: 0xFFc13f21, dash: [35, 7, 10, 80], period: 16000, dir: 1, alpha: 0.278),
   ];
 
   @override

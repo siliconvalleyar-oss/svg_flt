@@ -1,17 +1,29 @@
 # animated_app
 
-A new Flutter project.
+Galería de animaciones SVG y Rive para Flutter, con soporte de archivos locales y renderizado vía WebView.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Galería de SVGs animados (con soporte CSS `@keyframes` y `transform`) renderizados en WebView
+- Galería de Rive (`.riv`) — nativo para v7, WebView + runtime JS para v6
+- Carga de SVGs y RIVs desde el almacenamiento del teléfono
+- Splash screen animada
+- Tema Material 3 con Google Fonts (Poppins)
+- Rotación libre, sin restricciones de orientación
 
-A few resources to get you started if this is your first Flutter project:
+## Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter + Dart
+- `rive` (nativo para .riv v7)
+- `webview_flutter` (SVGs animados y .riv v6)
+- `flutter_animate` (transiciones)
+- `file_picker` (carga de archivos locales)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Docs
+
+- `docs/ARCHITECTURE.md` — estructura del proyecto
+- `docs/RULES.md` — reglas de versionado y git
+- `docs/SKILLS.md` — convenciones de código
+- `docs/CHANGELOG.md` — historial de cambios
+- `RULES.md` — reglas de oro del proyecto
+- `TODO.md` — tareas pendientes
