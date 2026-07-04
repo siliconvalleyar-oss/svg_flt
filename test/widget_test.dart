@@ -5,6 +5,7 @@ import 'package:animated_app/main.dart';
 void main() {
   testWidgets('App renders splash screen', (WidgetTester tester) async {
     await tester.pumpWidget(const AnimatedApp());
+    await tester.pump();
     expect(find.text('Bienvenido'), findsOneWidget);
   });
 }

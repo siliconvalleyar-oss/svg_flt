@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
 class RivePlayerWidget extends StatelessWidget {
-  final String assetPath;
+  final String? assetPath;
+  final String? filePath;
   final double width;
   final double height;
 
   const RivePlayerWidget({
     super.key,
-    required this.assetPath,
+    this.assetPath,
+    this.filePath,
     this.width = 200,
     this.height = 200,
-  });
+  }) : assert(assetPath != null || filePath != null);
 
   @override
   Widget build(BuildContext context) {
@@ -19,10 +21,15 @@ class RivePlayerWidget extends StatelessWidget {
       width: width,
       height: height,
       child: RiveWidgetBuilder(
-        fileLoader: FileLoader.fromAsset(
-          assetPath,
-          riveFactory: Factory.flutter,
-        ),
+        fileLoader: filePath != null
+            ? FileLoader.fromUrl(
+                Uri.file(filePath!).toString(),
+                riveFactory: Factory.flutter,
+              )
+            : FileLoader.fromAsset(
+                assetPath!,
+                riveFactory: Factory.flutter,
+              ),
         builder: (context, state) {
           if (state is RiveLoaded) {
             return RiveWidget(

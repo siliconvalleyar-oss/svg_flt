@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class AnimatedSplashSvg extends StatefulWidget {
   final double width;
