@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'widgets/svg_viewer.dart';
@@ -31,12 +32,21 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadAssetRives();
   }
 
-  void _loadAssetRives() {
-    _assetRives = [
-      'assets/riv/animated-button.riv',
-      'assets/riv/chat-icon.riv',
-      'assets/riv/confetti-celebration.riv',
-    ];
+  Future<void> _loadAssetRives() async {
+    try {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      _assetRives = manifest.listAssets()
+          .where((key) => key.startsWith('assets/riv/') && key.endsWith('.riv'))
+          .toList()
+        ..sort();
+    } catch (_) {
+      _assetRives = [
+        'assets/riv/animated-button.riv',
+        'assets/riv/chat-icon.riv',
+        'assets/riv/confetti-celebration.riv',
+      ];
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadPhoneFiles(String type) async {
