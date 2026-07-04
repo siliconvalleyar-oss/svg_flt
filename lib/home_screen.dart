@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _svgPath = 'Pictures/svg';
   String _rivPath = 'Pictures/riv';
-  bool _darkBackground = true;
+  bool _darkBackground = false;
 
   List<File> _phoneSvgs = [];
   List<File> _phoneRivs = [];
