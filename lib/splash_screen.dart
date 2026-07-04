@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'widgets/svg_viewer.dart';
+import 'widgets/animated_splash_svg.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -31,8 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SvgViewer(
-              assetPath: 'assets/svg/animated_00.svg',
+            const AnimatedSplashSvg(
               width: 250,
               height: 250,
             ).animate().fadeIn(duration: 600.ms).scale(

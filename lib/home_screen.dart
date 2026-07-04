@@ -153,36 +153,48 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _iconRow() {
+    final icons = [
+      ('assets/icons/home.svg', 'Home'),
+      ('assets/icons/search.svg', 'Search'),
+      ('assets/icons/heart.svg', 'Heart'),
+      ('assets/icons/star.svg', 'Star'),
+      ('assets/icons/user.svg', 'User'),
+    ];
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        AnimatedIconWidget(
-          assetPath: 'assets/icons/home.svg',
+      children: icons.map((entry) {
+        return AnimatedIconWidget(
+          assetPath: entry.$1,
           size: 36,
           color: Colors.black54,
-        ),
-        AnimatedIconWidget(
-          assetPath: 'assets/icons/search.svg',
-          size: 36,
-          color: Colors.black54,
-        ),
-        AnimatedIconWidget(
-          assetPath: 'assets/icons/heart.svg',
-          size: 36,
-          color: Colors.black54,
-        ),
-        AnimatedIconWidget(
-          assetPath: 'assets/icons/star.svg',
-          size: 36,
-          color: Colors.black54,
-        ),
-        AnimatedIconWidget(
-          assetPath: 'assets/icons/user.svg',
-          size: 36,
-          color: Colors.black54,
-        ),
-      ],
+          onTap: () => _showFullscreen(context, entry.$1, entry.$2),
+        );
+      }).toList(),
     ).animate().fadeIn(duration: 600.ms).slideY(begin: 20, end: 0);
+  }
+
+  void _showFullscreen(BuildContext context, String assetPath, String label) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            title: Text(label),
+          ),
+          body: Center(
+            child: SvgViewer(
+              assetPath: assetPath,
+              width: 200,
+              height: 200,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buttonRow(BuildContext context) {
