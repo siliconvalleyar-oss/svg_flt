@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return Padding(
               padding: EdgeInsets.only(
                 left: 24, right: 24, top: 24,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + MediaQuery.of(ctx).viewPadding.bottom + 24,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -267,12 +267,13 @@ class _HomeScreenState extends State<HomeScreen> {
     required Widget child,
     double width = 140,
     EdgeInsets padding = const EdgeInsets.all(16),
+    VoidCallback? onTap,
   }) {
     final isSelected = sectionSelected.contains(id);
     final opacity = sectionSelected.isNotEmpty ? (isSelected ? 1.0 : 0.35) : 1.0;
 
     return GestureDetector(
-      onTap: () => setState(() {
+      onTap: onTap ?? () => setState(() {
         if (isSelected) { _selected.remove(id); }
         else { _selected.add(id); }
       }),
@@ -318,6 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
             id: path,
             sectionSelected: sectionSelected,
             index: index,
+            onTap: () => _showSvgFullscreen(path),
             child: isAnimated
                 ? const AnimatedSplashSvg(width: 100, height: 100)
                 : _AnimatedSvgViewer(assetPath: path, width: 100, height: 100),
@@ -342,10 +344,12 @@ class _HomeScreenState extends State<HomeScreen> {
             sectionSelected: sectionSelected,
             index: index,
             padding: const EdgeInsets.all(8),
+            onTap: () => _showRiveFullscreen(path),
             child: RivePlayerWidget(
               assetPath: path,
               width: 120,
               height: 120,
+              onTap: () => _showRiveFullscreen(path),
             ),
           );
         },
@@ -655,6 +659,56 @@ class _HomeScreenState extends State<HomeScreen> {
           body: SafeArea(
             child: Center(
               child: _AnimatedSvgViewer(assetPath: assetPath, width: 200, height: 200),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSvgFullscreen(String path) {
+    final name = path.split('/').last.replaceAll('.svg', '');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: _bgColor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: _fgColor,
+            elevation: 0,
+            title: Text(name),
+          ),
+          body: SafeArea(
+            child: Center(
+              child: path == 'assets/svg/animated_00.svg'
+                  ? const AnimatedSplashSvg(width: double.infinity, height: double.infinity)
+                  : _AnimatedSvgViewer(assetPath: path, width: double.infinity, height: double.infinity),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showRiveFullscreen(String path) {
+    final name = path.split('/').last.replaceAll('.riv', '');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: _bgColor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            foregroundColor: _fgColor,
+            elevation: 0,
+            title: Text(name),
+          ),
+          body: SafeArea(
+            child: Center(
+              child: RivePlayerWidget(
+                assetPath: path,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
           ),
         ),

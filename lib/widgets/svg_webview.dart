@@ -5,12 +5,14 @@ class SvgWebView extends StatefulWidget {
   final String svgContent;
   final double width;
   final double height;
+  final VoidCallback? onTap;
 
   const SvgWebView({
     super.key,
     required this.svgContent,
     this.width = 200,
     this.height = 200,
+    this.onTap,
   });
 
   @override
@@ -18,15 +20,35 @@ class SvgWebView extends StatefulWidget {
 }
 
 class _SvgWebViewState extends State<SvgWebView> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
+  bool _ready = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _initWebView();
+    });
+  }
+
+  void _initWebView() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..loadHtmlString(_buildHtml());
+    if (mounted) setState(() => _ready = true);
+  }
+
+  @override
+  void didUpdateWidget(SvgWebView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.svgContent != widget.svgContent) {
+      _controller = null;
+      _ready = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _initWebView();
+      });
+    }
   }
 
   String _buildHtml() {
@@ -58,7 +80,26 @@ class _SvgWebViewState extends State<SvgWebView> {
     return SizedBox(
       width: widget.width,
       height: widget.height,
-      child: WebViewWidget(controller: _controller),
+      child: Stack(
+        children: [
+          if (_ready && _controller != null)
+            WebViewWidget(controller: _controller!)
+          else
+            const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

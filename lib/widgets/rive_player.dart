@@ -11,6 +11,7 @@ class RivePlayerWidget extends StatefulWidget {
   final String? filePath;
   final double width;
   final double height;
+  final VoidCallback? onTap;
 
   const RivePlayerWidget({
     super.key,
@@ -18,6 +19,7 @@ class RivePlayerWidget extends StatefulWidget {
     this.filePath,
     this.width = 200,
     this.height = 200,
+    this.onTap,
   }) : assert(assetPath != null || filePath != null);
 
   @override
@@ -93,6 +95,7 @@ class _RivePlayerWidgetState extends State<RivePlayerWidget> {
         rivData: data,
         width: widget.width,
         height: widget.height,
+        onTap: widget.onTap,
       );
     }
 

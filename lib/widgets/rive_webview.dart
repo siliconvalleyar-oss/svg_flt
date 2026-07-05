@@ -8,12 +8,14 @@ class RiveWebView extends StatefulWidget {
   final Uint8List rivData;
   final double width;
   final double height;
+  final VoidCallback? onTap;
 
   const RiveWebView({
     super.key,
     required this.rivData,
     this.width = 200,
     this.height = 200,
+    this.onTap,
   });
 
   @override
@@ -79,7 +81,17 @@ class _RiveWebViewState extends State<RiveWebView> {
     return SizedBox(
       width: widget.width,
       height: widget.height,
-      child: WebViewWidget(controller: _controller),
+      child: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
